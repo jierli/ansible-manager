@@ -1,0 +1,26 @@
+CREATE USER {{ mysqlrep_name }}@'10.%' identified by  '{{ mysqlrep_pwd }}';
+GRANT REPLICATION SLAVE,REPLICATION CLIENT ON *.* TO my_rep@'10.%';
+
+DELETE FROM mysql.user WHERE User='';
+DELETE FROM mysql.db WHERE User='';
+DELETE FROM mysql.user WHERE user='root' AND Host NOT IN ('localhost');
+
+GRANT ALL PRIVILEGES ON *.* TO '{{ mysqlroot_name }}'@'localhost' IDENTIFIED BY  '{{ mysqlroot_pwd }}' WITH GRANT OPTION;
+GRANT ALL PRIVILEGES ON *.* TO '{{ mysqlroot_name }}'@'127.0.0.1' IDENTIFIED BY  '{{ mysqlroot_pwd }}' WITH GRANT OPTION;
+
+DROP USER root@'localhost';
+RESET MASTER;
+
+{% if mgr_cluster %}
+#install plugin group_replication soname 'group_replication.so';
+change master to   master_user='{{ mysqlrep_name }}', master_password='{{ mysqlrep_pwd }}' for channel 'group_replication_recovery';
+
+    {% if primary_host in ansible_all_ipv4_addresses %}
+        set global group_replication_bootstrap_group=on;
+        start group_replication;
+        set global group_replication_bootstrap_group=off;
+    {% else %}
+        select sleep(30);
+        start group_replication;
+    {% endif %}
+{% endif %}

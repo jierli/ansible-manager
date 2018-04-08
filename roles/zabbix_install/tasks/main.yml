@@ -1,0 +1,35 @@
+---
+
+# 创建zabbix用户
+- name: create zabbix user
+  user: name='zabbix' shell=/bin/bash createhome=yes
+
+# 上传zabbixAgent包到指定server
+- name: copy zabbixAgent to Server
+  copy: src={{ playbook_dir }}/roles/download/zabbix.tgz dest=/usr/local/src/zabbix.tgz owner=zabbix group=zabbix backup=yes
+  tags: zabbixagent
+  register: copyFileResults
+
+- name: unarchive zabbix.tgz
+  shell: tar zxvf /usr/local/src/zabbix.tgz -C /usr/local/
+  when: copyFileResults.changed == True
+  tags: zabbixagent
+  notify:
+    - restart zabbixAgent
+
+- name: change zabbixAgent owner
+  shell: "chown -R zabbix:zabbix /usr/local/zabbix"
+
+- name: create service link
+  file: src=/usr/local/zabbix/zabbix-agentd dest=/etc/init.d/zabbix-agentd state=link
+  tags: zabbixagent
+
+# 安装mysql-connector-python依赖包
+- name: copy python-mysql rpm pack
+  copy: src={{ playbook_dir }}/roles/download/{{ python_mysql_connector }} dest=/usr/local/src/{{ python_mysql_connector }} backup=yes
+  register: copyMysqlConPythonStat
+
+- name: rpm install mysql-connector-python
+  yum: name=/usr/local/src/{{ python_mysql_connector }} state=present
+  when: copyMysqlConPythonStat.changed == True
+  ignore_errors: True

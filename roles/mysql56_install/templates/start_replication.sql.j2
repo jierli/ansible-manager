@@ -1,0 +1,12 @@
+CREATE USER {{ mysqlrep_name }}@'10.%' identified by  '{{ mysqlrep_pwd }}';
+GRANT REPLICATION SLAVE,REPLICATION CLIENT ON *.* TO my_rep@'10.%';
+
+DELETE FROM mysql.user WHERE User='';
+DELETE FROM mysql.db WHERE User='';
+DELETE FROM mysql.user WHERE user='root' AND Host NOT IN ('localhost');
+
+GRANT ALL PRIVILEGES ON *.* TO '{{ mysqlroot_name }}'@'localhost' IDENTIFIED BY  '{{ mysqlroot_pwd }}' WITH GRANT OPTION;
+GRANT ALL PRIVILEGES ON *.* TO '{{ mysqlroot_name }}'@'127.0.0.1' IDENTIFIED BY  '{{ mysqlroot_pwd }}' WITH GRANT OPTION;
+
+DROP USER root@'localhost';
+RESET MASTER;

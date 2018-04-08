@@ -1,0 +1,37 @@
+---
+
+- name: yum install MySQL-python
+  yum: name=MySQL-python state=latest
+
+- name: copy start sql file
+  template: src='{{ item }}.sql.j2' dest='/usr/local/src/{{item}}.sql'
+  with_items:
+    - start_replication
+  tags: copystartsqlfile
+
+- name: start mgr primary
+  mysql_db: name='mysql' state=import login_host='localhost' login_unix_socket={{ data_dir }}/mysql.sock login_user=root login_password='' target='/usr/local/src/{{ item }}.sql'
+  tags: startmgrprimary
+  with_items:
+    - start_replication
+  when: ansible_default_ipv4.address == primary_host
+
+- name: start mgr slave
+  mysql_db: name='mysql' state=import login_host='localhost' login_unix_socket={{ data_dir }}/mysql.sock login_user=root login_password='' target='/usr/local/src/{{ item }}.sql'
+  tags: startmgrslave
+  with_items:
+    - start_replication
+  when: ansible_default_ipv4.address != primary_host
+
+- name: copy default mysql user file
+  copy: src='{{ item }}.sql' dest='/usr/local/src/{{ item }}.sql'
+  with_items:
+    - default_mysql_user
+  tags: copydefaultuserfile
+
+- name: create default user
+  mysql_db: name='mysql' state=import login_host='localhost' login_unix_socket={{ data_dir }}/mysql.sock login_user={{ mysqlroot_name }} login_password={{ mysqlroot_pwd }} target='/usr/local/src/{{ item }}.sql'
+  tags: createdefaultuser
+  with_items:
+    - default_mysql_user
+  when: ansible_default_ipv4.address == primary_host

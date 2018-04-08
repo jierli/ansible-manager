@@ -1,0 +1,67 @@
+---
+
+- name: yum install MySQL-python
+  yum: name=MySQL-python state=latest
+
+- name: copy sql file
+  template: src='{{ item }}.sql.j2' dest='/usr/local/src/{{item}}.sql'
+  with_items:
+    - start_replication
+  tags: copysqlfile
+
+- name: create init user
+  mysql_db: name='mysql' state=import login_host='localhost' login_unix_socket={{ data_dir }}/mysql.sock login_user=root login_password='' target='/usr/local/src/{{ item }}.sql'
+  tags: startmgrprimary
+  with_items:
+    - start_replication
+
+- name:  if the slave have master skip
+  mysql_replication:
+    login_host: 'localhost'
+    login_unix_socket: '{{ data_dir }}/mysql.sock'
+    login_user: '{{ mysqlroot_name }}'
+    login_password: '{{ mysqlroot_pwd }}'
+    mode: 'getmaster'
+  register: slave_result
+  tags: getslave
+
+- name: debug getslave
+  debug: msg="The key value is {{ slave_result.File }}"
+  tags: getslave
+
+- name:  Change master
+  mysql_replication:
+    login_host: 'localhost'
+    login_unix_socket: '{{ data_dir }}/mysql.sock'
+    login_user: '{{ mysqlroot_name }}'
+    login_password: '{{ mysqlroot_pwd }}'
+    mode: 'changemaster'
+    master_host: '{{ primary_host }}'
+    master_port: '{{ mysql_port }}'
+    master_user: '{{ mysqlrep_name }}'
+    master_password: '{{ mysqlrep_pwd }}'
+    master_auto_position: 1
+  when: ansible_default_ipv4.address != primary_host
+
+- name:  start slave
+  mysql_replication:
+    login_host: 'localhost'
+    login_unix_socket: '{{ data_dir }}/mysql.sock'
+    login_user: '{{ mysqlroot_name }}'
+    login_password: '{{ mysqlroot_pwd }}'
+    mode: 'startslave'
+  when: ansible_default_ipv4.address != primary_host
+
+- name: copy default mysql user file
+  copy: src='{{ item }}.sql' dest='/usr/local/src/{{ item }}.sql'
+  with_items:
+    - default_mysql_user
+  tags: copydefaultuserfile
+  when: ansible_default_ipv4.address == primary_host
+
+- name: create default user
+  mysql_db: name='mysql' state=import login_host='localhost' login_unix_socket={{ data_dir }}/mysql.sock login_user={{ mysqlroot_name }} login_password={{ mysqlroot_pwd }} target='/usr/local/src/{{ item }}.sql'
+  tags: createdefaultuser
+  with_items:
+    - default_mysql_user
+  when: ansible_default_ipv4.address == primary_host
