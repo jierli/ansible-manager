@@ -15,7 +15,7 @@
   when: copyFileResults.changed == True
   tags: zabbixagent
   notify:
-    - restart zabbixAgent
+  - restart zabbixAgent
 
 - name: change zabbixAgent owner
   shell: "chown -R zabbix:zabbix /usr/local/zabbix"
