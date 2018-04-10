@@ -1,0 +1,60 @@
+---
+
+##修改主机名
+- name: get host name
+  shell: hostname
+  register: old_hostname_status
+  tags: changehostname
+
+- name: debug hostname
+  debug: msg="hostname:{{ old_hostname_status.stdout }}"
+  tags: changehostname
+
+- name: change hostname
+  hostname: name="{{ hostname }}"
+  when: old_hostname_status.stdout != hostname
+  tags: changehostname
+  ignore_errors: True
+
+- name: exit task if port has bin userd
+  fail: msg="system is not centos 6"
+  when: ansible_distribution != "CentOS" and ansible_distribution_major_version != "6"
+
+- name: get kernel parameter
+  shell: cat /boot/grub/grub.conf |grep deadline |wc -l
+  register: get_kernel_status
+  tags: changekernel
+
+- name: change kernel parameter
+  shell: sed "s/rd_NO_DM rhgb quiet/rd_NO_DM rhgb quiet  elevator=deadline/g" -i /boot/grub/grub.conf
+  when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "6" and get_kernel_status.stdout|int == 0
+  tags: changekernel
+
+- name: change io scheduler
+  shell: "{{ item }}"
+  with_items:
+  - "echo deadline > /sys/block/sda/queue/scheduler"
+  - "echo deadline > /sys/block/sdb/queue/scheduler"
+  ignore_errors: True
+  tags: changeioscheduler
+
+- name: change sysctl
+  sysctl: name="vm.swappiness" value=5 sysctl_set=yes state=present reload=yes
+  tags: changeioscheduler
+
+- name: change sysctl
+  sysctl: name="fs.aio-max-nr" value=262144 sysctl_set=yes state=present reload=yes
+  tags: changeioscheduler
+
+- name: change nproc conf
+  shell: "{{ item }}"
+  with_items:
+  - "sed -i '/nproc/s/soft/-/' /etc/security/limits.d/90-nproc.conf"
+  - "sed -i '/nproc/s/1024/65535/' /etc/security/limits.d/90-nproc.conf"
+  tags: changenprocconf
+
+
+- name: debug parameter
+  debug: msg="system version:{{ ansible_distribution }} {{ ansible_distribution_version }} {{ get_kernel_status.stdout}}"
+  tags: changehostname
+

@@ -1,0 +1,8 @@
+---
+
+- name: init system
+  hosts: server
+  become: yes
+  gather_facts: yes
+  roles:
+    - init_system
