@@ -1,7 +1,7 @@
 全局配置文件
     inventory.ini
 安装文件存放目录 ./roles/download/
-
+ 
 1 mysql5.7 安装
 ##配置文件 ./roles/mysql57_install/vars/main.yml
     ansible-playbook -i inventory.ini mysql57_install.yml  -k
