@@ -14,20 +14,21 @@
   tags: startmgrprimary
   with_items:
     - start_replication
+  ignore_errors: True
 
-- name:  if the slave have master skip
+- name:  get master result
   mysql_replication:
     login_host: 'localhost'
     login_unix_socket: '{{ data_dir }}/mysql.sock'
     login_user: '{{ mysqlroot_name }}'
     login_password: '{{ mysqlroot_pwd }}'
     mode: 'getmaster'
-  register: slave_result
-  tags: getslave
+  register: getmaster_result
+  tags: getmaster
 
-- name: debug getslave
-  debug: msg="The key value is {{ slave_result.File }}"
-  tags: getslave
+- name: debug getmaster
+  debug: msg="The key value is {{ getmaster_result.File }} {{getmaster_result.Position}}"
+  tags: getmaster
 
 - name:  Change master
   mysql_replication:
@@ -40,8 +41,23 @@
     master_port: '{{ mysql_port }}'
     master_user: '{{ mysqlrep_name }}'
     master_password: '{{ mysqlrep_pwd }}'
+    master_log_file: "{{ getmaster_result.File }}"
+    master_log_pos: "{{ getmaster_result.Position }}"
+  when: ansible_default_ipv4.address != primary_host and gtid == 0
+
+- name:  Change master for gtid
+  mysql_replication:
+    login_host: 'localhost'
+    login_unix_socket: '{{ data_dir }}/mysql.sock'
+    login_user: '{{ mysqlroot_name }}'
+    login_password: '{{ mysqlroot_pwd }}'
+    mode: 'changemaster'
+    master_host: '{{ primary_host }}'
+    master_port: '{{ mysql_port }}'
+    master_user: '{{ mysqlrep_name }}'
+    master_password: '{{ mysqlrep_pwd }}'
     master_auto_position: 1
-  when: ansible_default_ipv4.address != primary_host
+  when: ansible_default_ipv4.address != primary_host and gtid == 1
 
 - name:  start slave
   mysql_replication:

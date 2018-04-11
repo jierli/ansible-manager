@@ -4,6 +4,8 @@
 mysql_base_dir: "/usr/local/mysql56"
 ##安装包文件名，必须先在下载安装包到./roles/download/目录
 mysql_install_file: "Percona-Server-5.6.24-rel72.2-Linux.x86_64.ssl101"
+#1 表示开启GTID  0 表示关闭GTID
+gtid: 1
 
 primary_host: "{{ groups['server'][0] }}"
 mgr_Listen_Port: "{{ mysql_port | int + 20000 }}"
