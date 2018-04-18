@@ -8,9 +8,11 @@ DELETE FROM mysql.user WHERE user='root' AND Host NOT IN ('localhost');
 GRANT ALL PRIVILEGES ON *.* TO '{{ mysqlroot_name }}'@'localhost' IDENTIFIED BY  '{{ mysqlroot_pwd }}' WITH GRANT OPTION;
 GRANT ALL PRIVILEGES ON *.* TO '{{ mysqlroot_name }}'@'127.0.0.1' IDENTIFIED BY  '{{ mysqlroot_pwd }}' WITH GRANT OPTION;
 
+{% if mysqlroot_name !="root" %}
 DROP USER root@'localhost';
-RESET MASTER;
+{% endif %}
 
+RESET MASTER;
 {% if mgr_cluster %}
 #install plugin group_replication soname 'group_replication.so';
 change master to   master_user='{{ mysqlrep_name }}', master_password='{{ mysqlrep_pwd }}' for channel 'group_replication_recovery';

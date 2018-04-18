@@ -6,6 +6,7 @@
   gather_facts: yes
   roles:
     - mysql57_install
+  tags: mysql57install
 
 - name: zabbix install
   hosts: server

@@ -96,6 +96,6 @@
 
 - include_tasks: "group_replication.yml"
   when: mgr_cluster
-
+  tags: mgrcluster
 
 
