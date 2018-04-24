@@ -1,0 +1,10 @@
+---
+
+- name: mysql80 mgr install
+  hosts: server
+  become: yes
+  gather_facts: yes
+  roles:
+    - mysql80_install
+  tags: mysql80install
+

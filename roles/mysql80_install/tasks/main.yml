@@ -1,0 +1,101 @@
+---
+
+# 判断mysql端口以及数据目录是否存在
+- name: create mysql user
+  user: name='mysql'
+  tags: CeatemysqlUser
+
+- name: yum install lsof
+  yum: name=lsof state=latest
+
+- name: check mysql_port
+  shell: lsof -i:| grep {{ mysql_port }} | wc -l
+  register: mysql_port_result
+  ignore_errors: True
+
+- name: create mysql directories
+  file: path="{{ item }}" state=directory mode=0755 owner=mysql
+  with_items:
+  - "{{ data_dir }}"
+  - "{{ log_dir }}"
+  register: createdir_result
+  when: data_dir != log_dir
+
+- name: create mysql directories
+  file: path="{{ item }}" state=directory mode=0755 owner=mysql
+  with_items:
+  - "{{ data_dir }}"
+  register: createdir_result
+  when: data_dir  == log_dir
+
+- name: exit task if port has bin userd
+  fail: msg="port {{mysql_port}} has bin userd or {{ data_dir }} {{ log_dir }} is exists"
+  when: mysql_port_result.stdout != "0"  or createdir_result.changed == False
+
+# 生成参数文件my.cnf
+- name: create config file
+  template: src=my.cnf.j2 dest=/etc/my_{{ mysql_port }}.cnf owner=root mode=0644
+  register: mysql_conf
+  tags: copymycnffile
+
+# 解压MySQL安装包
+- name: create download src directories
+  file: path="/usr/local/src" state=directory mode=0755
+
+- name: copy mysql install file
+  copy: src={{ playbook_dir }}/roles/download/{{ mysql_install_file }}.tar.gz dest=/usr/local/src/{{ mysql_install_file }}.tar.gz mode=0755 backup=yes
+  register: copyfileResults
+  tags: copyfile
+
+- name: unarchive file
+  unarchive: src=/usr/local/src/{{ mysql_install_file }}.tar.gz dest=/usr/local/ copy=no
+  when: copyfileResults.changed == True
+  tags: unarchivefile
+
+# 创建软连接
+- name: make soft link to install file
+  file: src=/usr/local/{{ mysql_install_file }} dest={{ mysql_base_dir }} state=link
+  when: copyfileResults.changed == True
+  tags: makeinstallfilelink
+
+- name: make soft link to install file
+  file: src={{ mysql_base_dir }}/bin/{{ item }} dest=/usr/bin/{{ item }} state=link
+  with_items:
+  - "mysql"
+  - "mysqldump"
+  - "mysqlbinlog"
+  when: copyfileResults.changed == True
+  tags: makeexecfilelink
+  ignore_errors: True
+
+# 初始化数据库
+- name: copy {{ mysql_port }} start file
+  template: src=mysql.server.j2 dest=/etc/init.d/mysqld_{{ mysql_port }} owner=root mode=0755
+  register: mysql_conf
+
+#- name: copy {{ mysql_port }} start file
+#  shell: scp /usr/local/{{ mysql_install_file }}/support-files/mysql.server  /etc/init.d/mysqld_{{ mysql_port }}
+#  tags: initmysql
+
+#- name: sed {{ mysql_port }} start file
+#  shell: sed -i 's/--datadir="$datadir" --pid-file="$mysqld_pid_file_path"/--defaults-file=\/etc\/my_{{mysql_port}}.cnf/g'  /etc/init.d/mysqld_{{ mysql_port }}
+#- name: sed {{ mysql_port }} start file
+#  replace: dest=/etc/init.d/mysqld_{{ mysql_port }} regexp='--datadir="$datadir" --pid-file="$mysqld_pid_file_path"' replace='--defaults-file=/etc/my_{{mysql_port}}.cnf'
+
+- name: init mysql 80
+  shell: /{{ mysql_base_dir }}/bin/mysqld --defaults-file=/etc/my_{{mysql_port}}.cnf --user=mysql --datadir={{ data_dir }}  --initialize-insecure
+  tags: initmysql
+
+# 启动msyql实例
+- name: start mysql server
+  shell: /etc/init.d/mysqld_{{mysql_port}} restart
+
+#- include_tasks: "master_slave.yml"
+#  when: master_slave and mgr_cluster == False
+#  tags: includemasterslave
+
+- include_tasks: "group_replication.yml"
+  when: mgr_cluster
+  tags: mgrcluster
+
+

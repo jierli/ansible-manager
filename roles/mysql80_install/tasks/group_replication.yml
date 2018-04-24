@@ -1,0 +1,37 @@
+---
+
+- name: yum install MySQL-python
+  yum: name=MySQL-python state=latest
+
+- name: copy start sql file
+  template: src='{{ item }}.sql.j2' dest='/usr/local/src/{{item}}.sql'
+  with_items:
+    - start_replication
+  tags: copystartsqlfile
+
+- name: start mgr primary
+  shell: /{{ mysql_base_dir }}/bin/mysql --socket={{ data_dir }}/mysql.sock < /usr/local/src/{{ item }}.sql
+  tags: startmgrprimary
+  with_items:
+    - start_replication
+  when: ansible_default_ipv4.address == primary_host
+
+- name: start mgr slave
+  shell: /{{ mysql_base_dir }}/bin/mysql --socket={{ data_dir }}/mysql.sock < /usr/local/src/{{ item }}.sql
+  tags: startmgrslave
+  with_items:
+    - start_replication
+  when: ansible_default_ipv4.address != primary_host
+
+- name: copy default mysql user file
+  copy: src='{{ item }}.sql' dest='/usr/local/src/{{ item }}.sql'
+  with_items:
+    - default_mysql_user
+  tags: copydefaultuserfile
+
+- name: create default user
+  shell: /{{ mysql_base_dir }}/bin/mysql --socket={{ data_dir }}/mysql.sock -u{{ mysqlroot_name }} -p{{ mysqlroot_pwd }} < /usr/local/src/{{ item }}.sql
+  tags: createdefaultuser
+  with_items:
+    - default_mysql_user
+  when: ansible_default_ipv4.address == primary_host
