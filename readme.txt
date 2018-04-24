@@ -8,7 +8,7 @@
 2 mysql5.6 安装
 ##配置文件 ./roles/mysql56_install/vars/main.yml
     ansible-playbook -i inventory.ini mysql56_install.yml  -k
-3 mysql5.6 安装
+3 mysql8.0 安装
 ##配置文件 ./roles/mysql80_install/vars/main.yml
     ansible-playbook -i inventory.ini mysql80_install.yml  -k
 4 初始化linux系统
