@@ -20,9 +20,20 @@
   fail: msg="system is not centos 6"
   when: ansible_distribution != "CentOS" and ansible_distribution_major_version != "6"
 
-- name: Install python-mysqldb
+- name: yum install
   shell: yum install -y lrzsz perl perl-DBI perl-DBD-MySQL libev perl-Time-HiRes perl-IO-Socket-SSL python MySQL-python sysstat xfsprogs lzop socat openssl-devel libselinux-python libaio-devel gdb perl-TermReadKey
   tags: yuminstall
+
+- name: yum rpm install
+  yum: name={{ item }} state=present
+  with_items:
+  - "http://10.201.3.50/software/MegaCli-8.07.07-1.noarch.rpm"
+  - "http://10.201.3.50/software/percona-xtrabackup-24-2.4.9-1.el6.x86_64.rpm"
+  - "http://10.201.3.50/software/percona-toolkit-3.0.5-1.el6.x86_64.rpm"
+  - "http://10.201.3.50/software/pigz-2.3.3-1.el6.x86_64.rpm"
+  - "http://10.201.3.50/software/mha4mysql-node-0.56-0.el6.noarch.rpm"
+  ignore_errors: True
+  tags: yumrpminstall
 
 - name: get kernel parameter
   shell: cat /boot/grub/grub.conf |grep deadline |wc -l
