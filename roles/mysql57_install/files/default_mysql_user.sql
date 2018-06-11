@@ -14,6 +14,9 @@ CREATE USER cactistats@'127.0.0.1' identified by password '*78F8487B30773E6A1FA4
 GRANT PROCESS, SHOW DATABASES, SUPER ON *.* TO cactistats@'127.0.0.1';
 GRANT SELECT ON performance_schema.* TO cactistats@'127.0.0.1';
 
+CREATE USER 'cactistats'@'10.204.253.%' IDENTIFIED BY PASSWORD '*78F8487B30773E6A1FA40877123107AC21AE97F1';
+GRANT PROCESS ON *.* TO cactistats@'10.204.253.%';
+
 CREATE USER a10_check_pxc@'10.%' identified by password '*78F8487B30773E6A1FA40877123107AC21AE97F1';
 GRANT SELECT ON performance_schema.* TO a10_check_pxc@'10.%';
 
