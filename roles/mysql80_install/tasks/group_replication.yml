@@ -31,7 +31,7 @@
 
 - name: test my_rep login
   shell: /{{ mysql_base_dir }}/bin/mysql -h {{ ansible_default_ipv4.address }} -P {{ mysql_port }} -u{{ mysqlrep_name }} -p{{ mysqlrep_pwd }} -e "select 1"
-  tags: createdefaultuser
+  tags: testmyreplogin
 
 
 #- name: create default user
