@@ -5,6 +5,10 @@ DELETE FROM mysql.user WHERE User='';
 DELETE FROM mysql.db WHERE User='';
 DELETE FROM mysql.user WHERE user='root' AND Host NOT IN ('localhost');
 
+{% if mysqlroot_name =="root" %}
+ALTER USER {{ mysqlroot_name }}@'localhost' identified by  '{{ mysqlroot_pwd }}';
+{% endif %}
+
 CREATE USER IF NOT EXISTS {{ mysqlroot_name }}@'localhost' identified by  '{{ mysqlroot_pwd }}';
 GRANT ALL PRIVILEGES ON *.* TO '{{ mysqlroot_name }}'@'localhost'  WITH GRANT OPTION;
 CREATE USER IF NOT EXISTS {{ mysqlroot_name }}@'127.0.0.1' identified by  '{{ mysqlroot_pwd }}';

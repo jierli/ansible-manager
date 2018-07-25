@@ -133,6 +133,9 @@ log_timestamps                          = system
 #show_compatibility_56                   = on
 innodb_numa_interleave                  = 1
 
+##mysql80
+default_authentication_plugin           = mysql_native_password
+
 #GTID
 gtid_mode                               = ON
 enforce_gtid_consistency                = ON
@@ -145,7 +148,7 @@ binlog_checksum                         = NONE
 {% if mgr_cluster %}
 #MGR
 plugin_load                             = group_replication.so
-#group_replication_auto_increment_increment = 1
+group_replication_auto_increment_increment = 1
 transaction_write_set_extraction        = XXHASH64
 loose-group_replication_group_name      = "1bb1b861-f776-11e6-{{ mysql_port }}-{{ primary_host | get_mgrname() }}"
 loose-group_replication_start_on_boot   = off
