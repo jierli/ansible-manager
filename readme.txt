@@ -15,3 +15,8 @@
     ansible-playbook -i inventory.ini init_system.yml -k
 5 安装zabbix agent
     ansible-playbook -i inventory.ini mysql57_install.yml -t zabbixinstall -k
+
+
+备注：
+    如客户端有多个版本python时需设置（ansible_python_interpreter="/usr/bin/python2.6"）
+    例如ansible-playbook -i inventory.ini mysql80_install.yml  -k -e"ansible_python_interpreter="/usr/bin/python2.6""
