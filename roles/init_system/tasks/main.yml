@@ -40,9 +40,14 @@
   register: get_kernel_status
   tags: changekernel
 
-- name: change kernel parameter
+- name: change centos6 kernel parameter
   shell: sed "s/rd_NO_DM rhgb quiet/rd_NO_DM rhgb quiet  elevator=deadline/g" -i /boot/grub/grub.conf
   when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "6" and get_kernel_status.stdout|int == 0
+  tags: changekernel
+
+- name: change centos7 kernel parameter
+  replace: dest=/boot/grub/grub.conf regexp="LANG=en_US.UTF-8" replace="LANG=en_US.UTF-8 elevator=deadline"
+  when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "7" and get_kernel_status.stdout|int == 0
   tags: changekernel
 
 - name: change io scheduler
@@ -61,13 +66,28 @@
   sysctl: name="fs.aio-max-nr" value=262144 sysctl_set=yes state=present reload=yes
   tags: changeioscheduler
 
-- name: change nproc conf
+- name: change centos6 nproc conf
   shell: "{{ item }}"
   with_items:
   - "sed -i '/nproc/s/soft/-/' /etc/security/limits.d/90-nproc.conf"
   - "sed -i '/nproc/s/1024/65535/' /etc/security/limits.d/90-nproc.conf"
+  when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "6"
   tags: changenprocconf
 
+#- name: change centos7 nr_open conf
+#  sysctl: name="fs.nr_open" value=10240000 sysctl_set=yes state=present reload=yes
+#  when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "7"
+#  tags: changenprocconf
+
+- name: change centos7 nproc conf
+  lineinfile: dest=/etc/security/limits.d/20-nproc.conf regexp="4096" line="*          soft    nproc     65536"
+  when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "7"
+  tags: changenprocconf
+
+- name: change centos7 nproc conf
+  shell: "su mysql -c 'ulimit -u 65535'"
+  when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "7"
+  tags: changenprocconf
 
 - name: debug parameter
   debug: msg="system version:{{ ansible_distribution }} {{ ansible_distribution_version }} {{ get_kernel_status.stdout}}"
