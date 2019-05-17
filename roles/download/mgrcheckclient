@@ -1,0 +1,36 @@
+#!/bin/bash
+# chkconfig: 2345 20 80 
+SERVERNAME="mgrcheckclientd"
+
+start()
+{
+        nohup /opt/mysqldba/$SERVERNAME >/dev/null 2>&1 & 
+        #nohup /opt/mysqldba/$SERVERNAME & 
+        #关闭终端后继续运行需要用到nohup命令
+    echo "start $SERVERNAME ok!"
+    exit 0;
+}
+ 
+stop()
+{
+    killall $SERVERNAME
+    echo "stop $SERVERNAME ok!"
+}
+ 
+case "$1" in
+start)
+    start
+    ;;
+stop)
+    stop
+    ;;
+restart)
+    stop
+    start
+    ;;
+*)
+    echo "usage: $0 start|stop|restart"
+    exit 0;
+esac
+exit
+

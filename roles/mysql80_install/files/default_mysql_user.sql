@@ -13,6 +13,7 @@ GRANT PROCESS,SUPER ON *.* TO clustercheckuser@'localhost';
 CREATE USER cactistats@'127.0.0.1' IDENTIFIED WITH 'mysql_native_password' AS  '*78F8487B30773E6A1FA40877123107AC21AE97F1';
 GRANT PROCESS, SHOW DATABASES, SUPER ON *.* TO cactistats@'127.0.0.1';
 GRANT SELECT ON performance_schema.* TO cactistats@'127.0.0.1';
+GRANT SELECT ON `sys`.* TO 'cactistats'@'127.0.0.1';
 
 CREATE USER a10_check_pxc@'10.%' IDENTIFIED WITH 'mysql_native_password' AS  '*78F8487B30773E6A1FA40877123107AC21AE97F1';
 GRANT SELECT ON performance_schema.* TO a10_check_pxc@'10.%';

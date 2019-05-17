@@ -3,7 +3,7 @@
 #软连接路径
 mysql_base_dir: "/usr/local/mysql80"
 ##安装包文件名，必须先在下载安装包到./roles/download/目录
-mysql_install_file: "mysql-8.0.11-linux-glibc2.12-x86_64"
+mysql_install_file: "mysql-8.0.16-linux-glibc2.12-x86_64"
 
 primary_host: "{{ groups['server'][0] }}"
 mgr_Listen_Port: "{{ mysql_port | int + 20000 }}"

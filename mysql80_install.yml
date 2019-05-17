@@ -8,3 +8,10 @@
     - mysql80_install
   tags: mysql80install
 
+- name: zabbix install
+  hosts: server
+  gather_facts: no
+  become: yes
+  roles:
+    - zabbix_install
+  tags: zabbixinstall

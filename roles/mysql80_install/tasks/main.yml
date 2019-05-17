@@ -43,12 +43,12 @@
   file: path="/usr/local/src" state=directory mode=0755
 
 - name: copy mysql install file
-  copy: src={{ playbook_dir }}/roles/download/{{ mysql_install_file }}.tar.gz dest=/usr/local/src/{{ mysql_install_file }}.tar.gz mode=0755 backup=yes
+  copy: src={{ playbook_dir }}/roles/download/{{ mysql_install_file }}.tar.xz dest=/usr/local/src/{{ mysql_install_file }}.tar.xz mode=0755 backup=yes
   register: copyfileResults
   tags: copyfile
 
 - name: unarchive file
-  unarchive: src=/usr/local/src/{{ mysql_install_file }}.tar.gz dest=/usr/local/ copy=no
+  unarchive: src=/usr/local/src/{{ mysql_install_file }}.tar.xz dest=/usr/local/ copy=no
   when: copyfileResults.changed == True
   tags: unarchivefile
 

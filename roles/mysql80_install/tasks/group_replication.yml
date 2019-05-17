@@ -42,3 +42,21 @@
     - default_mysql_user
     - mgr_member_status
   when: ansible_default_ipv4.address == primary_host
+
+- name: copy mgrcheckclientd to Server
+  sudo: yes
+  copy: src={{ playbook_dir }}/roles/download/mgrcheckclientd dest=/opt/mysqldba/ owner=mysql group=mysql mode=0755
+  register: sendFileResults
+  tags: mgrcheckclientd
+
+- name: copy mgrcheckclient to Server init.d
+  sudo: yes
+  copy: src={{ playbook_dir }}/roles/download/mgrcheckclient dest=/etc/init.d/ owner=mysql group=mysql mode=0755
+  tags: init.d mgrcheckclient
+  when: sendFileResults.changed == True
+
+- name: restart mgrcheckclient
+  sudo: yes
+  service: name=mgrcheckclient state=restarted enabled=yes
+  when: sendFileResults.changed == True
+

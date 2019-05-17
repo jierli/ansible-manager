@@ -13,6 +13,7 @@ GRANT PROCESS,SUPER ON *.* TO clustercheckuser@'localhost';
 CREATE USER cactistats@'127.0.0.1' identified by password '*78F8487B30773E6A1FA40877123107AC21AE97F1';
 GRANT PROCESS, SHOW DATABASES, SUPER ON *.* TO cactistats@'127.0.0.1';
 GRANT SELECT ON performance_schema.* TO cactistats@'127.0.0.1';
+GRANT SELECT ON `sys`.* TO 'cactistats'@'127.0.0.1';
 
 CREATE USER 'cactistats'@'10.204.253.%' IDENTIFIED BY PASSWORD '*78F8487B30773E6A1FA40877123107AC21AE97F1';
 GRANT PROCESS ON *.* TO cactistats@'10.204.253.%';
