@@ -23,15 +23,17 @@
     - start_replication
   when: ansible_default_ipv4.address != primary_host
 
-- name: copy default mysql user file
+- name: copy default_mysql_user mgr_member_status file
   copy: src='{{ item }}.sql' dest='/usr/local/src/{{ item }}.sql'
   with_items:
     - default_mysql_user
-  tags: copydefaultuserfile
+    - mgr_member_status
+  tags: copydefaultfile
 
-- name: create default user
+- name: create default_user mgr_member_status
   mysql_db: name='mysql' state=import login_host='localhost' login_unix_socket={{ data_dir }}/mysql.sock login_user={{ mysqlroot_name }} login_password={{ mysqlroot_pwd }} target='/usr/local/src/{{ item }}.sql'
-  tags: createdefaultuser
+  tags: createdefaultsql
   with_items:
     - default_mysql_user
+    - mgr_member_status
   when: ansible_default_ipv4.address == primary_host
