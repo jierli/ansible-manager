@@ -1,7 +1,9 @@
 ###全局配置文件
-    inventory.ini
+```
+inventory.ini
 安装文件存放目录 ./roles/download/
- 
+```
+
 ###1 mysql5.7 安装
 ```
 ##配置文件 ./roles/mysql57_install/vars/main.yml
@@ -22,7 +24,8 @@ ansible-playbook -i inventory.ini mysql80_install.yml  -k
 ansible-playbook -i inventory.ini init_system.yml -k
 ```
 ###5 安装zabbix agent
-    ansible-playbook -i inventory.ini mysql57_install.yml -t zabbixinstall -k
+```
+ansible-playbook -i inventory.ini mysql57_install.yml -t zabbixinstall -k
 ```
 
 ###备注：
