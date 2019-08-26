@@ -55,13 +55,9 @@
   template: src=mongod.server.j2 dest=/etc/init.d/mongod_{{ mongodb_port }} owner=root mode=0755
   register: mongodb_conf
 
-#创建认证文件
-- name: create authfile
-  shell: openssl rand -base64 666 > mongodb.key.j2
-
 #cp 认证文件
 - name: copy {{ mongodb_port }} authfile
-  template: src=~/mongodb.key.j2 dest=/etc/mongodb_{{ mongodb_port }}.key mode=600
+  template: src=mongodb.key.j2 dest=/etc/mongodb_{{ mongodb_port }}.key mode=600
 
 # 启动mongod实例
 - name: start mongod server
