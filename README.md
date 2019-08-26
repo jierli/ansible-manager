@@ -27,7 +27,11 @@ ansible-playbook -i inventory.ini init_system.yml -k
 ```
 ansible-playbook -i inventory.ini mysql57_install.yml -t zabbixinstall -k
 ```
-
+### 6 mongodb4.2 安装
+```
+##配置文件 ./roles/mongoddb_install/vars/main.yml
+ansible-playbook -i inventory.ini mongodb_install.yml -k
+```
 ###备注：
 ```
 如客户端有多个版本python时需设置（ansible_python_interpreter="/usr/bin/python2.6"）

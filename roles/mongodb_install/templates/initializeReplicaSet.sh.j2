@@ -1,0 +1,17 @@
+use admin;
+config = {_id:  {{ replName }}, members: [
+                          {_id: 0, host: '{{ groups['mongodb'][0] }}:{{ mongodb_port }}', priority:120 },
+                          {_id: 1, host: '{{ groups['mongodb'][1] }}:{{ mongodb_port }}', priority:110 },
+                          {_id: 2, host: '{{ groups['mongodb'][2] }}:{{ mongodb_port }}', priority:100 }]
+                 };
+rs.initiate(config);
+sleep(60000)
+use admin;
+db.createUser(
+  {
+    user: "root",
+    pwd: "123456",
+    roles: [ { role: "root", db: "admin" } ]
+  }
+);
+db.auth("root","123456");

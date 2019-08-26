@@ -1,0 +1,7 @@
+#软连接路径
+mongodb_base_dir: "/usr/local/mongodb40"
+###安装包文件名，必须先在下载安装包到./roles/download/目录
+mongodb_install_file: "mongodb-linux-x86_64-rhel70-4.2.0"
+#
+disauth: "authorization: disabled"
+enauth: "authorization: enabled"

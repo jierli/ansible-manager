@@ -1,0 +1,10 @@
+---
+
+- name: mongodb  install
+  hosts: mongodb
+  become: yes
+  gather_facts: yes
+  roles:
+    - mongodb_install
+  tags: mongodbinstall
+

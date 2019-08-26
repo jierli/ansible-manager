@@ -1,0 +1,85 @@
+---
+# 判断mongodb端口以及数据目录是否存在
+- name: check mongo_port
+  shell: lsof -i:| grep {{ mongodb_port }} | wc -l
+  register: mongodb_port_result
+  ignore_errors: True
+
+- name: create mongo directories
+  file: path={{ item }} state=directory mode=0755
+  with_items:
+  - "{{ dbPath }}"
+  register: createdir_result  
+
+- name: exit task if port has bin userd
+  fail: msg="port {{mongodb_port}} has bin userd or {{ dbPath }}  is exists"
+  when: mongodb_port_result.stdout != "0"  or createdir_result.changed == False
+
+# 生成参数文件mongodb.cnf
+- name: create config file
+  template: src=mongod.conf.j2 dest=/etc/mongod_{{ mongodb_port }}.conf owner=root mode=0644
+  register: mongod_conf
+  tags: copyconffile
+
+# 解压mongodb安装包
+- name: create download src directories
+  file: path="/usr/local/src" state=directory mode=0755
+
+- name: copy mongodb install file
+  copy: src={{ playbook_dir }}/roles/download/{{ mongodb_install_file }}.tgz dest=/usr/local/src/{{ mongodb_install_file }}.tgz mode=0755 backup=yes
+  register: copyfileResults
+  tags: copyfile
+
+- name: unarchive file
+  unarchive: src=/usr/local/src/{{ mongodb_install_file }}.tgz dest=/usr/local/ copy=no
+  when: copyfileResults.changed == True
+  tags: unarchivefile
+
+# 创建软连接
+- name: make soft link to install file
+  file: src=/usr/local/{{ mongodb_install_file }} dest={{ mongodb_base_dir }} state=link
+  when: copyfileResults.changed == True
+  tags: makeinstallfilelink
+
+- name: make soft link to install file
+  file: src={{ mongodb_base_dir }}/bin/{{ item }} dest=/usr/bin/{{ item }} state=link
+  with_items:
+  - "mongo"
+  - "mongod"
+  when: copyfileResults.changed == True
+  tags: makeexecfilelink
+  ignore_errors: True
+
+# 拷贝启动文件
+- name: copy {{ mongodb_port }} start file
+  template: src=mongod.server.j2 dest=/etc/init.d/mongod_{{ mongodb_port }} owner=root mode=0755
+  register: mongodb_conf
+
+#创建认证文件
+- name: create authfile
+  shell: openssl rand -base64 666 > mongodb.key.j2
+
+#cp 认证文件
+- name: copy {{ mongodb_port }} authfile
+  template: src=~/mongodb.key.j2 dest=/etc/mongodb_{{ mongodb_port }}.key mode=600
+
+# 启动mongod实例
+- name: start mongod server
+  shell: /etc/init.d/mongod_{{ mongodb_port }} restart
+
+- name: copy initializeReplica file
+  template: src=initializeReplicaSet.sh.j2 dest='/usr/local/src/initializeReplicaSet.sh'
+  when: ansible_default_ipv4.address == groups['mongodb'][0]
+
+# 副本集配置并创建用户
+- name: initializeReplicaSet and createUser
+  shell: mongo 127.0.0.1:{{ mongodb_port }}/admin < /usr/local/src/initializeReplicaSet.sh
+  when: ansible_default_ipv4.address == groups['mongodb'][0]
+
+# 开启认证
+- name: open auth
+  shell: sed -i "s/{{ disauth }}/{{ enauth }}/g" /etc/mongod_{{ mongodb_port }}.conf
+
+# restart server
+- name: restart mongod server
+  shell: /etc/init.d/mongod_{{ mongodb_port }} restart 
