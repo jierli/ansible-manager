@@ -25,7 +25,7 @@ storage:
 #  More info for wiredTiger: https://docs.mongodb.com/v3.4/reference/configuration-options/#storage-wiredtiger-options
   wiredTiger:
     engineConfig:
-      cacheSizeGB: 1
+      cacheSizeGB: {{ cacheSizeGB }}
       statisticsLogDelaySecs: 0
       journalCompressor: snappy
       directoryForIndexes: false
@@ -81,6 +81,8 @@ replication:
   replSetName: {{ replName  }}
   oplogSizeMB: 20480
 
+sharding:
+  clusterRole: shardsvr
 #sharding:
 
 ## Enterprise-Only Options:

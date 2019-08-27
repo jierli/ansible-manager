@@ -3,11 +3,11 @@
 #chkconfig: 2345 80 90
 #description: mongodb
 start() {
- /usr/bin/mongod -f /etc/mongod_{{ mongodb_port }}.conf
+ {{ mongodb_base_dir }}/bin/mongod -f /etc/mongod_{{ mongodb_port }}.conf
 }
 
 stop() {
-      /usr/bin/mongod -f /etc/mongod_{{ mongodb_port }}.conf --shutdown
+ {{ mongodb_base_dir }}/bin/mongod -f /etc/mongod_{{ mongodb_port }}.conf --shutdown
 }
 
 case "$1" in

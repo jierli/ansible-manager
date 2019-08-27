@@ -5,13 +5,13 @@ config = {_id:  {{ replName }}, members: [
                           {_id: 2, host: '{{ groups['mongodb'][2] }}:{{ mongodb_port }}', priority:100 }]
                  };
 rs.initiate(config);
-sleep(60000)
+sleep(60000);
 use admin;
 db.createUser(
   {
-    user: "root",
-    pwd: "123456",
+    user: "{{ mongodbroot_name }}",
+    pwd: "{{ mongodbroot_pwd }}",
     roles: [ { role: "root", db: "admin" } ]
   }
 );
-db.auth("root","123456");
+db.auth("{{ mongodbroot_name }}","{{ mongodbroot_pwd }}");
