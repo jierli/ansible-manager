@@ -1,0 +1,47 @@
+---
+
+- name: copy mgrcheckclientd to Server
+  sudo: yes
+  copy: src={{ playbook_dir }}/roles/download/mgrcheckclientd dest=/opt/mysqldba/ owner=mysql group=mysql mode=0755
+  tags: mgrcheckclientd
+  register: sendFileResults
+  when: mgr_cluster
+
+- name: config supervisord
+  sudo: yes
+  blockinfile:
+    path: /etc/supervisord.d/mgrcheckclient.ini
+    create: yes
+    block: |
+      [program:mgrcheckclientd] #MGR健康检查
+      directory=/opt/mysqldba
+      command=/opt/mysqldba/mgrcheckclientd
+      autostart=true
+      autorestart=true
+      stderr_logfile=/dev/null
+      stdout_logfile=/tmp/mgrcheckclientd_stdout.log
+      user = mysql
+    marker: "#{mark} mgrcheckclientd to start"
+  tags: config supervisord
+  when: sendFileResults.changed == True and mgr_cluster
+  notify:
+  - restart mgrcheckclient
+
+#- name: copy mgrcheckclientd to Server
+##  sudo: yes
+##  copy: src={{ playbook_dir }}/roles/download/mgrcheckclientd dest=/opt/mysqldba/ owner=mysql group=mysql mode=0755
+##  register: sendFileResults
+##  tags: mgrcheckclientd
+#   when: mgr_cluster
+
+##- name: copy mgrcheckclient to Server init.d
+##  sudo: yes
+##  copy: src={{ playbook_dir }}/roles/download/mgrcheckclient dest=/etc/init.d/ owner=mysql group=mysql mode=0755
+##  tags: init.d mgrcheckclient
+##  when: sendFileResults.changed == True
+#
+##- name: restart mgrcheckclient
+##  sudo: yes
+##  service: name=mgrcheckclient state=restarted enabled=yes
+##  when: sendFileResults.changed == True
+#

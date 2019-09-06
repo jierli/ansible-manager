@@ -15,3 +15,12 @@
   roles:
     - zabbix_install
   tags: zabbixinstall
+
+- name: mgrcheckclient install
+  hosts: server
+  gather_facts: no
+  become: yes
+  roles:
+    - mgrcheckclient_install
+  tags: mgrcheckclientinstall
+

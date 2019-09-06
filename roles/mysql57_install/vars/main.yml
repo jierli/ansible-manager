@@ -3,7 +3,7 @@
 #软连接路径
 mysql_base_dir: "/usr/local/mysql57"
 ##安装包文件名，必须先在下载安装包到./roles/download/目录
-mysql_install_file: "Percona-Server-5.7.21-21-Linux.x86_64.ssl101"
+mysql_install_file: "Percona-Server-5.7.26-29-Linux.x86_64.ssl101"
 
 primary_host: "{{ groups['server'][0] }}"
 mgr_Listen_Port: "{{ mysql_port | int + 20000 }}"

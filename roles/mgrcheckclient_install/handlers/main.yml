@@ -1,0 +1,7 @@
+---
+
+- name: restart mgrcheckclient
+  sudo: yes
+  shell: supervisorctl update & supervisorctl restart mgrcheckclientd
+  tags: start mgrcheckclient
+  when: mgr_cluster
