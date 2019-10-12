@@ -18,7 +18,7 @@
       command=/opt/mysqldba/mgrcheckclientd
       autostart=true
       autorestart=true
-      stderr_logfile=/dev/null
+      stderr_logfile=/tmp/mgrcheckclientd_stderr.log
       stdout_logfile=/tmp/mgrcheckclientd_stdout.log
       user = mysql
     marker: "#{mark} mgrcheckclientd to start"
