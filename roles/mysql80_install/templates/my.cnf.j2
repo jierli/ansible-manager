@@ -150,7 +150,7 @@ loose-group_replication_ip_whitelist    = "10.0.0.0/8"
 loose-group_replication_bootstrap_group = off
 #slave_preserve_commit_order             = on
 report_host                             = {{ ansible_default_ipv4.address }}
-group_replication_member_weight         = {{ mgr_weight }}
+loose-group_replication_member_weight         = {{ mgr_weight }}
 {% endif %}
 
 #innodb monitor
